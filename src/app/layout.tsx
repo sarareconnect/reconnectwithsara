@@ -20,10 +20,10 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen antialiased">
         <NextTopLoader
-          color="#0f172a"
+          color="#15a079"
           height={3}
           showSpinner={false}
-          shadow="0 0 10px #0f172a,0 0 5px #0f172a"
+          shadow="0 0 10px #15a079,0 0 5px #15a079"
         />
         {children}
         <Toaster richColors position="top-right" />

@@ -31,7 +31,7 @@ export function Sidebar({ items, brand, subtitle }: SidebarProps) {
   return (
     <aside className="hidden w-60 shrink-0 flex-col border-r bg-white md:flex">
       <div className="flex items-center gap-2 px-5 py-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-900 text-sm font-bold text-white">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#15a079] text-sm font-bold text-white">
           S
         </div>
         <div className="leading-tight">
@@ -51,7 +51,7 @@ export function Sidebar({ items, brand, subtitle }: SidebarProps) {
               className={cn(
                 "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 active
-                  ? "bg-slate-900 text-white"
+                  ? "bg-[#15a079] text-white"
                   : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
               )}
             >
