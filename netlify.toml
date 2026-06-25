@@ -1,0 +1,23 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
+  # Prisma needs the binary target for the Netlify build image.
+  PRISMA_CLI_BINARY_TARGETS = "rhel-openssl-3.0.x"
+
+# The official Next.js runtime plugin enables SSR, API routes, and
+# server actions on Netlify Functions.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[functions]
+  # Image/ZIP generation needs the native canvas binary bundled.
+  external_node_modules = ["@napi-rs/canvas"]
+  node_bundler = "esbuild"
+
+# Long-running ZIP/image generation routes get extra time.
+[functions."api/enterprises/*"]
+  # 26s is the maximum on most Netlify plans; raise on Pro/Enterprise.
+  timeout = 26

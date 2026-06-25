@@ -1,0 +1,106 @@
+// Sara - Prisma schema
+// Database: PostgreSQL (Neon)
+// Docs: https://www.prisma.io/docs
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ENTERPRISE_MANAGER
+}
+
+enum EnterpriseStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+/// Platform owner accounts (super admins).
+model Admin {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String   @map("password_hash")
+  role         Role     @default(SUPER_ADMIN)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("admins")
+}
+
+/// An enterprise client (the business that owns many stores).
+model Enterprise {
+  id           String           @id @default(cuid())
+  name         String
+  managerName  String           @map("manager_name")
+  managerEmail String           @map("manager_email")
+  managerPhone String?          @map("manager_phone")
+  username     String           @unique
+  passwordHash String           @map("password_hash")
+  role         Role             @default(ENTERPRISE_MANAGER)
+  status       EnterpriseStatus @default(ACTIVE)
+  createdAt    DateTime         @default(now()) @map("created_at")
+  updatedAt    DateTime         @updatedAt @map("updated_at")
+
+  stores      Store[]
+  bulkUploads BulkUpload[]
+
+  @@index([status])
+  @@index([managerEmail])
+  @@map("enterprises")
+}
+
+/// A single physical store/location with its referral landing page.
+model Store {
+  id           String   @id @default(cuid())
+  enterpriseId String   @map("enterprise_id")
+  storeName    String   @map("store_name")
+  slug         String   @unique
+  offerTitle   String?  @map("offer_title")
+  benefits     String[] @default([])
+  phone        String?
+  whatsapp     String?
+  mapsLink     String?  @map("maps_link")
+  instagram    String?
+  youtube      String?
+  facebook     String?
+  storeLink    String?  @map("store_link")
+  /// Free-form extra buttons stored as JSON: [{ label, url }]
+  customButtons Json    @default("[]") @map("custom_buttons")
+  qrCodePath    String? @map("qr_code_path")
+  friendCardPath String? @map("friend_card_path")
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  enterprise Enterprise @relation(fields: [enterpriseId], references: [id], onDelete: Cascade)
+
+  @@index([enterpriseId])
+  @@index([enterpriseId, active])
+  @@index([storeName])
+  @@map("stores")
+}
+
+/// Audit record of a CSV bulk import.
+model BulkUpload {
+  id             String   @id @default(cuid())
+  enterpriseId   String   @map("enterprise_id")
+  fileName       String   @map("file_name")
+  recordsCreated Int      @default(0) @map("records_created")
+  recordsUpdated Int      @default(0) @map("records_updated")
+  recordsFailed  Int      @default(0) @map("records_failed")
+  uploadedAt     DateTime @default(now()) @map("uploaded_at")
+
+  enterprise Enterprise @relation(fields: [enterpriseId], references: [id], onDelete: Cascade)
+
+  @@index([enterpriseId])
+  @@map("bulk_uploads")
+}
